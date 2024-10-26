@@ -1,7 +1,6 @@
 import { UserLogin } from "../interfaces/UserLogin";
 
 const login = async (userInfo: UserLogin) => {
-  // TODO: make a POST request to the login route
   try {
     const response = await fetch('/auth/login', {
       method: 'POST',
@@ -11,14 +10,21 @@ const login = async (userInfo: UserLogin) => {
       body: JSON.stringify(userInfo),
     });
 
+    // Check if the response is OK
     if (!response.ok) {
-      throw new Error('Login failed');
+      const errorResponse = await response.json();
+      console.error('Login error:', errorResponse);
+      throw new Error(errorResponse.message || 'Login failed');
     }
 
     const data = await response.json();
 
-    // Store the JWT in localStorage for later authenticated requests
-    localStorage.setItem('token', data.token);
+    // Ensure there's a token to store
+    if (data.token) {
+      localStorage.setItem('token', data.token); // Store the JWT in localStorage
+    } else {
+      throw new Error('No token received');
+    }
 
     return data; 
   } catch (error) {
@@ -28,3 +34,4 @@ const login = async (userInfo: UserLogin) => {
 };
 
 export { login };
+
