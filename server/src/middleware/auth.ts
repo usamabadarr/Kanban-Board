@@ -1,32 +1,35 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
-interface JwtPayload {
-  username: string;
+// Extend Express's Request type to include user property
+declare module 'express' {
+  export interface Request {
+    user?: JwtPayload;
+  }
 }
 
-export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-  // TODO: verify the token exists and add the user data to the request object
+export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
+  // Extract token from Authorization header
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json({ message: 'Access token is missing' });
+    res.status(401).json({ message: 'Access token is missing' });
+    return; // Ensure no further execution
   }
 
-  jwt.verify(token, process.env.JWT_SECRET_KEY as string, (err, decodedToken) => {
+  jwt.verify(token, process.env.JWT_SECRET_KEY as string, (err, decoded) => {
     if (err) {
-      return res.status(403).json({ message: 'Invalid or expired token' });
+      res.status(403).json({ message: 'Invalid or expired token' });
+      return; // Stop further execution
     }
 
-    if (decodedToken && typeof decodedToken !== 'string') {
-      req.user = decodedToken as JwtPayload;
-      return next();
+    // Attach decoded token to request if valid
+    if (decoded && typeof decoded !== 'string') {
+      req.user = decoded as JwtPayload;
+      next(); // Proceed to the next middleware or route handler
     } else {
-      return res.status(403).json({ message: 'No user data in token' });
+      res.status(403).json({ message: 'Malformed token payload' });
     }
   });
-
-  // Ensure a return in case jwt.verify fails to call next() or return a response
-  return;
 };
