@@ -36,7 +36,7 @@ React Router
 1. Clone the Repository
 Clone this repository to your local machine:
 
-git clone https://github.com/your-username/kanban-board.git
+git clone ```git@github.com:usamabadarr/Kanban-Board.git```
 
 2. Install Backend Dependencies
 Navigate to the backend folder and install the necessary dependencies:
