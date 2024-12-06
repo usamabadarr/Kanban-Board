@@ -48,8 +48,11 @@ npm install
 Create a .env file in the server directory with the following variables:
 
 DB_NAME=kanban_db
+
 DB_USER=your_database_user
+
 DB_PASSWORD=your_database_password
+
 JWT_SECRET_KEY=your_secret_key
 
 4. Set Up Database
